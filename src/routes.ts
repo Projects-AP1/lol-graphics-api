@@ -15,7 +15,7 @@ routes.post('/api/sumonnerApi',  new SumonnerController().getSumonner)
 
 routes.post('/infoMatchCreate', new InfoMatchController().create)
 // routes.post('/infoMatchList', new InfoMatchController().List)
-routes.post('/getMatchBypuuid', new GetMatcheByPuuidController().List)
+routes.post('/api/getMatchBypuuid', new GetMatcheByPuuidController().List)
 
 
 export default routes
