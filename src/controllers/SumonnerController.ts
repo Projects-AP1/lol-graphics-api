@@ -59,11 +59,9 @@ export default class SumonnerController {
   }
 
   async list(req: Request, res: Response) {
-    const { name } = req.body;
+    // const { name } = req.body;
 
-    const sumonners = await sumonnerRepository.findBy({
-        name: ILike(`%${name}%`)
-    })
+    const sumonners = await sumonnerRepository.find();
     return res.status(200).json(sumonners);
   }
 
