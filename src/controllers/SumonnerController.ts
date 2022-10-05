@@ -18,8 +18,8 @@ export default class SumonnerController {
 
       if (userExists?.puuid != null) {
         return res
-          .status(200)
-          .json(`O invocador ${userExists.name} já está cadastrado!`);
+          .status(400)
+          .json(`The summoner is already registered!`);
       }
 
       const newSumonner = sumonnerRepository.create({
@@ -29,9 +29,8 @@ export default class SumonnerController {
 
       await sumonnerRepository.save(newSumonner);
 
-      return res.status(201).json(newSumonner);
+      return res.status(201).json({summoner: newSumonner, message: 'Summoner registered successfully'});
     } catch (error) {
-      console.error(error);
       return res.status(500).json({ error });
     }
   }
@@ -67,7 +66,7 @@ export default class SumonnerController {
 
   getSumonner = async (req: Request, res: Response) => {
     const { name } = req.body;
-   
+  
       const result = await this.getSumonnerApi(name);
     
       if( result?.status?.status_code == 404){

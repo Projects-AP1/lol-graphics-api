@@ -8,12 +8,12 @@ const routes = Router();
 /***************************************************************/
 /*                         SUMONNER                            */   
 routes.post('/api/sumonnerSave', new SumonnerController().create)
-routes.put('/sumonnerUpdate', new SumonnerController().update)
+routes.put('/api/sumonnerUpdate', new SumonnerController().update)
 routes.get('/api/sumonnerList', new SumonnerController().list)
 routes.post('/api/sumonnerApi',  new SumonnerController().getSumonner)
 /**************************************************************/
 
-routes.post('/infoMatchCreate', new InfoMatchController().create)
+routes.post('/api/infoMatchCreate', new InfoMatchController().create)
 // routes.post('/infoMatchList', new InfoMatchController().List)
 routes.post('/api/getMatchBypuuid', new GetMatcheByPuuidController().List)
 
