@@ -7,10 +7,11 @@ const routes = Router();
     
 /***************************************************************/
 /*                         SUMONNER                            */   
-routes.post('/api/sumonnerSave', new SumonnerController().create)
 routes.put('/api/sumonnerUpdate', new SumonnerController().update)
 routes.get('/api/sumonnerList', new SumonnerController().list)
-routes.post('/api/sumonnerApi',  new SumonnerController().getSumonner)
+routes.get('/api/getSumonnerGrath',  new SumonnerController().getSumonnerGrath)
+routes.post('/api/sumonnerApiByName',  new SumonnerController().getSumonnerByName)
+routes.post('/api/sumonnerSave', new SumonnerController().create)
 /**************************************************************/
 
 routes.post('/api/infoMatchCreate', new InfoMatchController().create)
