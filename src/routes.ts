@@ -9,7 +9,7 @@ const routes = Router();
 /*                         SUMONNER                            */   
 routes.put('/api/sumonnerUpdate', new SumonnerController().update)
 routes.get('/api/sumonnerList', new SumonnerController().list)
-routes.get('/api/getSumonnerGrath',  new SumonnerController().getSumonnerGrath)
+ routes.get('/api/getSumonnerGrath',  new SumonnerController().saveSumonnerGrath)
 routes.post('/api/sumonnerApiByName',  new SumonnerController().getSumonnerByName)
 routes.post('/api/sumonnerSave', new SumonnerController().create)
 /**************************************************************/

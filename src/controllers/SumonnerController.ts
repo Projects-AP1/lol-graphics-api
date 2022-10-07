@@ -4,7 +4,8 @@ import { AppDataSource } from "../data-source";
 import { Sumonner } from "../entities/Sumonner";
 import { ILike } from "typeorm";
 import fetch from "node-fetch";
-import { json } from 'stream/consumers';
+import { json } from "stream/consumers";
+import { summonerGraphRepository } from "../repositories/SummonerGraphRepository";
 export default class SumonnerController {
   async create(req: Request, res: Response) {
     const { puuid, name } = req.body;
@@ -27,12 +28,10 @@ export default class SumonnerController {
 
       await sumonnerRepository.save(newSumonner);
 
-      return res
-        .status(201)
-        .json({
-          summoner: newSumonner,
-          message: "Summoner registered successfully",
-        });
+      return res.status(201).json({
+        summoner: newSumonner,
+        message: "Summoner registered successfully",
+      });
     } catch (error) {
       return res.status(500).json({ error });
     }
@@ -107,21 +106,36 @@ export default class SumonnerController {
     return response.json();
   };
 
-  getSumonnerGrath = async (req: Request, res: Response) => {
+  saveSumonnerGrath = async (req: Request, res: Response) => {
+    //banco
     const sumonners = await sumonnerRepository.find();
-    const sumonnerArray = [];
     for (let sumonner of sumonners) {
-     const sumo = await this.getSumonnerByPuuid(sumonner.puuid);
+      const sumo = await this.getSumonnerByPuuid(sumonner.puuid);
+      console.log(sumo);
+      const savedSumGraph = summonerGraphRepository.save({
+        summonerpuuid: sumo.puuid,
+        name: sumo.name,
+        urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`,
+        nivel: sumo.summonerLevel,
+      });
 
-     sumonnerArray.push(
-      {
-        "name":sumo.name,
-        "profileIconId": sumo.profileIconId,
-        "steps": sumo.summonerLevel
-      }
-     ) 
     }
-    
-    return res.status(200).json(sumonnerArray);
+    return res.status(200).json("Sucesso na rotina");
+
+    // return res.status(200).json(sumonnerArray);
   };
+
+  // getIconSumoner = async (profileIconId: String) => {
+  //   const response = await fetch(
+  //     `${process.env.URL_IMG}/img/profileicon/${profileIconId}.png}`,
+  //     {
+  //       method: "get",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Cache-Control": "no-cache, no-store, must-revalidate",
+  //       },
+  //     }
+  //   );
+  //   return response;
+  // };
 }
