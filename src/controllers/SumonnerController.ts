@@ -2,11 +2,15 @@ import { Request, Response } from "express";
 import { sumonnerRepository } from "../repositories/SumonnerRepository";
 import { AppDataSource } from "../data-source";
 import { Sumonner } from "../entities/Sumonner";
-import { ILike } from "typeorm";
+import { SummonerGraph } from "../entities/SummonerGraph";
 import fetch from "node-fetch";
-import { json } from "stream/consumers";
 import { summonerGraphRepository } from "../repositories/SummonerGraphRepository";
+import { rescheduleJob } from "node-schedule";
+
 export default class SumonnerController {
+  static getSumonnerByPuuid(puuid: string) {
+    throw new Error("Method not implemented.");
+  }
   async create(req: Request, res: Response) {
     const { puuid, name } = req.body;
 
@@ -50,7 +54,7 @@ export default class SumonnerController {
       return res.status(200).json(`O invocador ${userExists.name} não existe!`);
     }
 
-    const updateSumonner = await AppDataSource.createQueryBuilder()
+    await AppDataSource.createQueryBuilder()
       .update(Sumonner)
       .set({ name: name })
       .where("puuid = :puuid", { puuid: puuid })
@@ -106,36 +110,64 @@ export default class SumonnerController {
     return response.json();
   };
 
-  saveSumonnerGrath = async (req: Request, res: Response) => {
-    //banco
-    const sumonners = await sumonnerRepository.find();
-    for (let sumonner of sumonners) {
-      const sumo = await this.getSumonnerByPuuid(sumonner.puuid);
-      console.log(sumo);
-      const savedSumGraph = summonerGraphRepository.save({
-        summonerpuuid: sumo.puuid,
-        name: sumo.name,
-        urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`,
-        nivel: sumo.summonerLevel,
-      });
-
+  hasInSummoner = async ()  => {
+    const summonerGraphQuery = summonerGraphRepository
+    .createQueryBuilder()
+    .select('summonerpuuid')
+    .getSql();
+    
+    const summonersToSave = await AppDataSource.getRepository(Sumonner)
+      .createQueryBuilder()
+      .where(`puuid NOT IN (${summonerGraphQuery})`)
+      .execute();
+  
+    if(summonersToSave.length){
+      return await this.saveSummonerGraph(summonersToSave);
     }
-    return res.status(200).json("Sucesso na rotina");
-
-    // return res.status(200).json(sumonnerArray);
+    return await this.updateSummonerGrath();
+  };
+  
+  updateSummonerGrath = async () => {
+    const sumonners = await sumonnerRepository.find();
+    
+    sumonners.forEach(async(summoner) => {
+      const sumo = await this.getSumonnerByPuuid(summoner.puuid);
+      await AppDataSource.createQueryBuilder()
+      .update(SummonerGraph)
+      .set({
+        name: sumo.name, 
+        urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`, 
+        nivel: sumo.nivel,
+      })
+      .where("summonerpuuid = :summonerpuuid", { summonerpuuid: sumo.puuid })
+      .execute();
+    });
+    
+    return rescheduleJob
   };
 
-  // getIconSumoner = async (profileIconId: String) => {
-  //   const response = await fetch(
-  //     `${process.env.URL_IMG}/img/profileicon/${profileIconId}.png}`,
-  //     {
-  //       method: "get",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Cache-Control": "no-cache, no-store, must-revalidate",
-  //       },
-  //     }
-  //   );
-  //   return response;
-  // };
+  saveSummonerGraph = async (summoners : any[]) => {
+    try{
+      for (const sumonner of summoners) {
+        const sumo = await this.getSumonnerByPuuid(sumonner.Sumonner_puuid);
+        console.log(sumo)
+        summonerGraphRepository.save({
+          summonerpuuid: sumo.puuid,
+          name: sumo.name,
+          urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`,
+          nivel: sumo.summonerLevel,
+        });
+  
+      }
+      console.log("Summoners saved");
+    }catch(err){
+      console.log(err);
+    }
+  };
+
+  getSumonnerGrath = async (req: Request, res: Response) => {
+    const graphData = await summonerGraphRepository.find();
+
+    return res.status(200).json(graphData);
+  };
 }

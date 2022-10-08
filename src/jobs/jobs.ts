@@ -1,7 +1,10 @@
-import * as schedule from "node-schedule";
+import {scheduleJob} from "node-schedule";
+import SumonnerController from '../controllers/SumonnerController';
 
-const event = schedule.scheduleJob("*/1 * * * *", function () {
-    
-  console.log("This runs every 5 minutes");
-});
+export const jobSaveDataSummonerGrath = () => {
+  scheduleJob("*/1 * * * *", async()=> {
+    new SumonnerController().hasInSummoner();
+    console.log('rotina')
+  });
+};
 
