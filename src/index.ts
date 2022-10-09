@@ -2,9 +2,11 @@ import express from "express";
 import { AppDataSource } from "./data-source";
 import routes from "./routes";
 import cors from "cors";
+import { jobSaveDataSummonerGrath } from "./jobs/jobs";
 
 AppDataSource.initialize().then(() => {
-
+  console.log("chegou")
+  jobSaveDataSummonerGrath()
 
   const app = express();
 

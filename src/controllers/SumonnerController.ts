@@ -110,63 +110,66 @@ export default class SumonnerController {
     return response.json();
   };
 
-  hasInSummoner = async ()  => {
+  hasInSummoner = async () => {
     const summonerGraphQuery = summonerGraphRepository
-    .createQueryBuilder()
-    .select('summonerpuuid')
-    .getSql();
-    
+      .createQueryBuilder()
+      .select("summonerpuuid")
+      .getSql();
+
     const summonersToSave = await AppDataSource.getRepository(Sumonner)
       .createQueryBuilder()
       .where(`puuid NOT IN (${summonerGraphQuery})`)
       .execute();
-  
-    if(summonersToSave.length){
+
+    if (summonersToSave.length) {
       return await this.saveSummonerGraph(summonersToSave);
     }
     return await this.updateSummonerGrath();
   };
-  
+
   updateSummonerGrath = async () => {
     const sumonners = await sumonnerRepository.find();
-    
-    sumonners.forEach(async(summoner) => {
+
+    sumonners.forEach(async (summoner) => {
       const sumo = await this.getSumonnerByPuuid(summoner.puuid);
       await AppDataSource.createQueryBuilder()
-      .update(SummonerGraph)
-      .set({
-        name: sumo.name, 
-        urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`, 
-        nivel: sumo.nivel,
-      })
-      .where("summonerpuuid = :summonerpuuid", { summonerpuuid: sumo.puuid })
-      .execute();
+        .update(SummonerGraph)
+        .set({
+          name: sumo.name,
+          urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`,
+          nivel: sumo.nivel,
+        })
+        .where("summonerpuuid = :summonerpuuid", { summonerpuuid: sumo.puuid })
+        .execute();
     });
-    
-    return rescheduleJob
+
+    return rescheduleJob;
   };
 
-  saveSummonerGraph = async (summoners : any[]) => {
-    try{
+  saveSummonerGraph = async (summoners: any[]) => {
+    try {
       for (const sumonner of summoners) {
         const sumo = await this.getSumonnerByPuuid(sumonner.Sumonner_puuid);
-        console.log(sumo)
+        console.log(sumo);
         summonerGraphRepository.save({
           summonerpuuid: sumo.puuid,
           name: sumo.name,
           urlimg: `${process.env.URL_IMG}/img/profileicon/${sumo.profileIconId}.png`,
           nivel: sumo.summonerLevel,
         });
-  
       }
       console.log("Summoners saved");
-    }catch(err){
+    } catch (err) {
       console.log(err);
     }
   };
 
   getSumonnerGrath = async (req: Request, res: Response) => {
-    const graphData = await summonerGraphRepository.find();
+    const graphData = await summonerGraphRepository.find({
+      order: {
+        nivel: "DESC",
+      },
+    });
 
     return res.status(200).json(graphData);
   };
