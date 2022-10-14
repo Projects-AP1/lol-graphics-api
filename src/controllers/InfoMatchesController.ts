@@ -2,7 +2,7 @@ import { infoMatchRepository } from "../repositories/InfoMatchRepository";
 import fetch from "node-fetch";
 import { queuesRepository } from "../repositories/QueuesRepository";
 import { InfoMatche } from "../entities/InfoMatche";
-import { timer } from '../utils/timer';
+import { timer } from "../utils/timer";
 
 export interface Info {
   idjogo: string;
@@ -153,20 +153,22 @@ export default class InfoMatchController {
       infosMatch.vitoria = infos.vitoria;
       infosMatch.fila = infos.fila;
 
-     const existMatch = await infoMatchRepository.find({
-        where:{
+      const existMatch = await infoMatchRepository.find({
+        where: {
           puuid: infosMatch.puuid,
-          idjogo: infosMatch.idjogo 
-        }
-      })
+          idjogo: infosMatch.idjogo,
+        },
+      });
 
-      if(!existMatch.length){
+      if (!existMatch.length) {
         let newInfoMatch = await infoMatchRepository.save(infosMatch);
-        console.log("partida Salva. Nome: "+newInfoMatch.nomeinvocador+ " puuid: "+ newInfoMatch.puuid)
+        console.log(
+          "partida Salva. Nome: " +
+            newInfoMatch.nomeinvocador +
+            " puuid: " +
+            newInfoMatch.puuid
+        );
       }
-
-    
-      
     } catch (error) {
       console.error(error);
     }
@@ -177,7 +179,7 @@ export default class InfoMatchController {
       for (let matche of matches) {
         if (matche != "") {
           let infos = await this.getInfoMatch(matche);
-         await  this.filterData(infos, puuid);
+          await this.filterData(infos, puuid);
         }
       }
     } catch (error) {
@@ -186,25 +188,20 @@ export default class InfoMatchController {
   };
 
   getInfoMatch = async (matche: string) => {
-    let valid = true;
-   
-      await timer(1);
-      const response = await fetch(
-        `${process.env.URL}/match/v5/matches/${matche}?api_key=${process.env.TOKEN}`,
-        {
-          method: "get",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-          },
-        }
-      );
-      console.log(response.status)  
-      if (response.status == 200) {
-        valid = false;
-        return response.json();
+    await timer(1);
+    const response = await fetch(
+      `${process.env.URL}/match/v5/matches/${matche}?api_key=${process.env.TOKEN}`,
+      {
+        method: "get",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
       }
-    
+    );
+    console.log(response.status);
+
+    return response.json();
   };
 
   filterData = async (infos: any, puuid: string) => {
@@ -220,7 +217,7 @@ export default class InfoMatchController {
             queueid: infos?.info?.queueId,
           },
         });
-       
+
         let infosMatch = {
           idjogo: infos?.info?.gameId,
           datacriacaodojogo: new Date(infos?.info?.gameStartTimestamp),
