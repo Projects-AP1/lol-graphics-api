@@ -63,9 +63,7 @@ export default class SumonnerController {
     return res.status(201).json("Atualizado Com sucesso!");
   }
 
-  list = async (req: Request, res: Response) => {
-    // const { name } = req.body;
-
+   listSummoners = async (req: Request, res: Response) => {
     const sumonners = await sumonnerRepository.find();
     return res.status(200).json(sumonners);
   };
@@ -82,7 +80,7 @@ export default class SumonnerController {
     return res.status(200).json(result);
   };
 
-  getSumonnerByPuuid = async (puuid: String) => {
+  getSumonnerByPuuid = async (puuid: string) => {
     const response = await fetch(
       `${process.env.URLBR1}/summoner/v4/summoners/by-puuid/${puuid}?api_key=${process.env.TOKEN}`,
       {
@@ -150,7 +148,7 @@ export default class SumonnerController {
     try {
       for (const sumonner of summoners) {
         const sumo = await this.getSumonnerByPuuid(sumonner.Sumonner_puuid);
-        console.log(sumo);
+
         summonerGraphRepository.save({
           summonerpuuid: sumo.puuid,
           name: sumo.name,

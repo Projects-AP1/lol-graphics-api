@@ -5,7 +5,7 @@ import cors from "cors";
 import { jobSaveDataSummonerGrath } from "./jobs/jobs";
 
 AppDataSource.initialize().then(() => {
-  console.log("chegou")
+  //Jobs
   jobSaveDataSummonerGrath()
 
   const app = express();

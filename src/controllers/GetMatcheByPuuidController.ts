@@ -1,38 +1,48 @@
-import { Request, Response } from "express";
 import { dateRopository } from "../repositories/DateRepository";
 import { DateSearch } from "../entities/Date";
 import fetch from "node-fetch";
 import { infoMatchRepository } from "../repositories/InfoMatchRepository";
 import { Raw } from "typeorm";
 import InfoMatchController from "./InfoMatchesController";
+import { sumonnerRepository } from "../repositories/SumonnerRepository";
 export default class GetMatcheByPuuidController {
-  List = async (req: Request, res: Response) => {
-    const { puuid, name } = req.body;
+  hasInMatch = async () => {
+    const sumonners = await sumonnerRepository.find();
 
+    for (let sumonner of sumonners) {
+      await  this.getMatch(sumonner.puuid , sumonner.name);
+    }
+  };
+
+  getMatch = async (puuid: string, name: string) => {
     try {
       const atualDate = new Date();
-      var matches: Array<string> = [];
+      let matches: Array<string> = [];
       const info: InfoMatchController = new InfoMatchController();
-     
-     let dates = await this.returnDate(puuid)
-    
+
+      let dates = await this.returnDate(puuid);
+
       for (let date of dates) {
         if (
           atualDate.getTime() / 1000 > Number(date.initialtimestamp) &&
           atualDate.getTime() / 1000 > Number(date.finaltimestamp)
         ) {
           let matche = await this.getMatchBypuuid(date, puuid);
-          console.log(matche);
+          console.log( name +" : Foram encontradas " + matche.length + " partidas na semana " + date.initialdate)
           matches = matches.concat(matche);
         }
       }
-    
-     info.List(matches, puuid);
 
-      return res.status(200).json(matches.length != 0 ? `Foram encontrados ${matches.length} partidas ` : "Não tem partida em seu historico"  );
+      await info.getInfos(matches, puuid);
+      console.log(
+        matches.length != 0
+          ? `Foram encontrados ${matches.length} partidas `
+          : "Não tem partida em seu historico"
+      );
+    
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error });
+      return JSON.stringify(error);
     }
   };
 
@@ -52,8 +62,7 @@ export default class GetMatcheByPuuidController {
     return await response.json();
   };
 
-  returnDate = async (puuid:any) => {
-
+  returnDate = async (puuid: any) => {
     const dateMatch = await infoMatchRepository.find({
       select: {
         datacriacaodojogo: true,
@@ -65,19 +74,30 @@ export default class GetMatcheByPuuidController {
         datacriacaodojogo: "DESC",
       },
     });
-    
-   if(dateMatch.length > 0){
-    const dates = await dateRopository.findBy({
-      initialdate: Raw(
-        (alias) =>
-          `${alias} >'${dateMatch[0].datacriacaodojogo}'`
-      ),
-    });
-    
-    return dates;
-   }else{
-    const dates = await dateRopository.find()
-    return dates;
-   }
+
+    if (dateMatch.length > 0) {
+      const dateFinal = await dateRopository
+        .createQueryBuilder("date_search")
+        .where("date_search.initialdate < :initialdate", {
+          initialdate: dateMatch[0].datacriacaodojogo,
+        })
+        .orderBy("date_search.initialdate", "DESC")
+        .limit(1)
+        .execute();
+
+      const dates = await dateRopository.findBy({
+        initialdate: Raw(
+          (alias) =>
+            `${alias} >='${dateFinal[0].date_search_initialdate
+              .toISOString()
+              .substr(0, 10)}'`
+        ),
+      });
+
+      return dates;
+    } else {
+      const dates = await dateRopository.find();
+      return dates;
+    }
   };
 }

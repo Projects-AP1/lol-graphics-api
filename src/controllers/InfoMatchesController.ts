@@ -1,15 +1,12 @@
-import { Request, Response } from "express";
-import { sumonnerRepository } from "../repositories/SumonnerRepository";
 import { infoMatchRepository } from "../repositories/InfoMatchRepository";
 import fetch from "node-fetch";
 import { queuesRepository } from "../repositories/QueuesRepository";
 import { InfoMatche } from "../entities/InfoMatche";
-import { json } from "stream/consumers";
-import { Interface } from "readline";
+import { timer } from '../utils/timer';
 
 export interface Info {
   idjogo: string;
-   datacriacaodojogo: Date;
+  datacriacaodojogo: Date;
   duracaodojogo: number;
   assistencias: string;
   baroeseliminados: string;
@@ -78,12 +75,12 @@ export interface Info {
   wardskilled: string;
   vitoria: string;
   fila: string;
-};
+}
 
 export default class InfoMatchController {
   async create(infos: Info) {
     try {
-      var infosMatch = new InfoMatche();
+      const infosMatch = new InfoMatche();
       infosMatch.idjogo = infos.idjogo;
       infosMatch.datacriacaodojogo = infos.datacriacaodojogo;
       infosMatch.duracaodojogo = infos.duracaodojogo;
@@ -156,20 +153,31 @@ export default class InfoMatchController {
       infosMatch.vitoria = infos.vitoria;
       infosMatch.fila = infos.fila;
 
-     let newInfoMatch = await infoMatchRepository.save(infosMatch);
-      console.log(newInfoMatch);
+     const existMatch = await infoMatchRepository.find({
+        where:{
+          puuid: infosMatch.puuid,
+          idjogo: infosMatch.idjogo 
+        }
+      })
+
+      if(!existMatch.length){
+        let newInfoMatch = await infoMatchRepository.save(infosMatch);
+        console.log("partida Salva. Nome: "+newInfoMatch.nomeinvocador+ " puuid: "+ newInfoMatch.puuid)
+      }
+
+    
+      
     } catch (error) {
       console.error(error);
     }
   }
 
-  List = async (matches: Array<string>, puuid: String) => {
+  getInfos = async (matches: Array<string>, puuid: string) => {
     try {
       for (let matche of matches) {
         if (matche != "") {
           let infos = await this.getInfoMatch(matche);
-          this.filterData(infos, puuid);
-          
+         await  this.filterData(infos, puuid);
         }
       }
     } catch (error) {
@@ -178,24 +186,29 @@ export default class InfoMatchController {
   };
 
   getInfoMatch = async (matche: string) => {
-    return  await fetch(
-      `${process.env.URL}/summoner/v4/summoners/by-name/${matche}?api_key=${process.env.TOKEN}`,
-      {
-        method: "get",
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-        },
+    let valid = true;
+    while (valid) {
+      await timer(1);
+      const response = await fetch(
+        `${process.env.URL}/match/v5/matches/${matche}?api_key=${process.env.TOKEN}`,
+        {
+          method: "get",
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        }
+      );
+      console.log(response.status)  
+      if (response.status == 200) {
+        valid = false;
+        return response.json();
       }
-    );
-
-     
+    }
   };
 
-
-  filterData = (infos:any, puuid: String) => {
-
-    infos.info?.participants.forEach(async (info: any) => {
+  filterData = async (infos: any, puuid: string) => {
+    for (let info of infos.info?.participants) {
       if (info.puuid === puuid) {
         let gameDuration = (infos?.info?.gameDuration % 3600) / 60;
         let totaltempomorto = (info?.totalTimeSpentDead % 3600) / 60;
@@ -207,11 +220,10 @@ export default class InfoMatchController {
             queueid: infos?.info?.queueId,
           },
         });
-
+       
         let infosMatch = {
           idjogo: infos?.info?.gameId,
-           datacriacaodojogo: new Date(
-            infos?.info?.gameStartTimestamp),
+          datacriacaodojogo: new Date(infos?.info?.gameStartTimestamp),
           duracaodojogo: parseFloat(Number(gameDuration)?.toFixed(2)),
           assistencias: info?.assists,
           baroeseliminados: info?.baronKills,
@@ -279,11 +291,11 @@ export default class InfoMatchController {
           wardscolocadas: info?.wardsPlaced,
           wardskilled: info?.wardsKilled,
           vitoria: info?.win,
-          fila: queues[0].description ,
+          fila: queues[0].description,
         };
 
-        this.create(infosMatch)
+        await this.create(infosMatch);
       }
-    });
-  }
+    }
+  };
 }
