@@ -187,7 +187,7 @@ export default class InfoMatchController {
 
   getInfoMatch = async (matche: string) => {
     let valid = true;
-    while (valid) {
+   
       await timer(1);
       const response = await fetch(
         `${process.env.URL}/match/v5/matches/${matche}?api_key=${process.env.TOKEN}`,
@@ -204,7 +204,7 @@ export default class InfoMatchController {
         valid = false;
         return response.json();
       }
-    }
+    
   };
 
   filterData = async (infos: any, puuid: string) => {
