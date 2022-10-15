@@ -15,13 +15,13 @@ export default class SumonnerController {
     const { puuid, name } = req.body;
 
     try {
-      const userExists = await sumonnerRepository.findOne({
+      const sumonnerExists = await sumonnerRepository.findOne({
         where: {
           puuid: puuid,
         },
       });
 
-      if (userExists?.puuid != null) {
+      if (sumonnerExists?.puuid != null) {
         return res.status(400).json(`The summoner is already registered!`);
       }
 
