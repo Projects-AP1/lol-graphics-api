@@ -6,7 +6,7 @@ import { jobSaveDataSummonerGrath } from "./jobs/jobs";
 
 AppDataSource.initialize().then(() => {
   //Jobs
-  jobSaveDataSummonerGrath()
+  //jobSaveDataSummonerGrath()
 
   const app = express();
 

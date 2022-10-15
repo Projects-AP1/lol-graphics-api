@@ -10,23 +10,23 @@ const routes = Router();
     
 /***************************************************************/
 /*                         SUMONNER                            */   
-routes.put('/api/sumonnerUpdate', new SumonnerController().update)
-routes.get('/api/sumonnerList', new SumonnerController().listSummoners)
-routes.get('/api/getSumonnerGrath', new SumonnerController().getSumonnerGrath)
-routes.post('/api/sumonnerApiByName',  new SumonnerController().getSumonnerByName)
-routes.post('/api/sumonnerSave', new SumonnerController().create)
+routes.put('/api/sumonnerUpdate',auth,new SumonnerController().update)
+routes.get('/api/sumonnerList',auth, new SumonnerController().listSummoners)
+routes.get('/api/getSumonnerGrath',auth,new SumonnerController().getSumonnerGrath)
+routes.post('/api/sumonnerApiByName',auth,new SumonnerController().getSumonnerByName)
+routes.post('/api/sumonnerSave',auth,new SumonnerController().create)
 /**************************************************************/
 
 /***************************************************************/
 /*                         USERS                               */  
 routes.post('/api/userSave', new UsersController().create)
-routes.post('/api/userUpdate', new UsersController().updateUser)
+routes.post('/api/userUpdate',auth,new UsersController().updateUser)
 /***************************************************************/
 
 
 /***************************************************************/
 /*                         LOGIN                               */  
-routes.post('/api/login',auth, new LoginController().login)
+routes.post('/api/login', new LoginController().login)
 
 routes.post('/api/infoMatchCreate', new InfoMatchController().create)
 // routes.post('/infoMatchList', new InfoMatchController().List)

@@ -15,15 +15,16 @@ export default class LoginController {
       },
     });
 
-
-    console.log('ewe')
     if(foundUser){
         const token = jwt.sign({username: foundUser.username, name: foundUser.email}, SECRET_KEY,{
-            expiresIn: '1h',
+            expiresIn: 60,
         });
 
-        console.log(token)
-        // return { user: {username}, token: token }
+        const Authorization ={
+            username: username,
+            token: token,
+        }
+        return res.status(200).json(Authorization)
      
     }else{
         return res.status(400).json("Usuário ou Senha incorreto")

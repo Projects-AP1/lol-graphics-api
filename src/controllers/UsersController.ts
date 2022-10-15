@@ -16,7 +16,7 @@ export default class UsersController {
       });
 
       if (userExist?.username) {
-        return res.status(400).json("Usuario já esta cadastrado Já Cadastrado");
+        return res.status(200).json("Usuario já esta cadastrado Já Cadastrado");
       }
 
       const saltRounds = 8;
