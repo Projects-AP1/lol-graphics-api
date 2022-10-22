@@ -3,6 +3,8 @@ import { AppDataSource } from "../data-source";
 import { Users } from "../entities/Users";
 import { usersRepository } from "../repositories/UsersRepository";
 import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
+import SendEmail from "./SendEmailController";
 
 export default class UsersController {
   async create(req: Request, res: Response) {
@@ -23,16 +25,31 @@ export default class UsersController {
       //encriptando a senha
       const password = await bcrypt.hash(passwordUser, saltRounds);
 
+      const autenticationtoken = uuidv4();
+      const authenticated = "FALSE";
+
       const newUser = usersRepository.create({
         username,
         password,
         email,
         puuid,
+        autenticationtoken,
+        authenticated,
       });
 
       await usersRepository.save(newUser);
 
-      return res.status(200).json("Usaruio cadastrado com sucesso!");
+      new SendEmail().sendEmailRegistration(
+        username,
+        autenticationtoken,
+        email
+      );
+
+      return res
+        .status(200)
+        .json(
+          "Usuario cadastrado com sucesso!, um email de confirmação foi enviado"
+        );
     } catch (error) {
       console.error(error);
     }
@@ -96,5 +113,28 @@ export default class UsersController {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async confirmEmail(req: Request, res: Response) {
+    const validUser = await usersRepository.findOne({
+      where: {
+        autenticationtoken: req.params.token,
+      },
+    });
+
+    if (validUser?.authenticated == "FALSE") {
+      await AppDataSource.createQueryBuilder()
+        .update(Users)
+        .set({
+          authenticated: "TRUE",
+        })
+        .where("username = userName", { userName: validUser.username })
+        .execute();
+
+      return res.status(200).json("Email Confirmado com sucesso!");
+    } else if (validUser?.authenticated == "TRUE") {
+      return res.status(200).json("Email já foi confirmado!");
+    }
+    return res.status(200).json("Usuario não foi encontrado");
   }
 }

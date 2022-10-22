@@ -24,7 +24,7 @@ export default class GetMatcheByPuuidController {
 
       for (let date of dates) {
         if (
-          atualDate.getTime() / 1000 > Number(date.initialtimestamp)
+          atualDate.getTime() / 1000 >= Number(date.initialtimestamp)
         ) {
           let matche = await this.getMatchBypuuid(date, puuid);
           console.log( name +" : Foram encontradas " + matche.length + " partidas na semana " + date.initialdate)

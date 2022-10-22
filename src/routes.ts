@@ -2,9 +2,10 @@ import { Router } from "express";
 import InfoMatchController from "./controllers/InfoMatchesController";
 import SumonnerController from './controllers/SumonnerController';
 import GetMatcheByPuuidController from './controllers/GetMatcheByPuuidController';
-import UsersController from "./controllers/UsersController";
+import UsersController from './controllers/UsersController';
 import LoginController from './controllers/LoginController';
 import { auth } from './middleware/auth';
+import SendEmail from "./controllers/SendEmailController";
 
 const routes = Router();
     
@@ -29,8 +30,8 @@ routes.post('/api/userUpdate',auth,new UsersController().updateUser)
 routes.post('/api/login', new LoginController().login)
 
 routes.post('/api/infoMatchCreate', new InfoMatchController().create)
-// routes.post('/infoMatchList', new InfoMatchController().List)
- routes.get('/api/getMatchBypuuid', new GetMatcheByPuuidController().hasInMatch)
+routes.get('/api/confirmEmail/:token', new UsersController().confirmEmail)
+routes.get('/api/getMatchBypuuid', new GetMatcheByPuuidController().hasInMatch)
 
 
 export default routes

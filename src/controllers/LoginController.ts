@@ -17,7 +17,7 @@ export default class LoginController {
 
     if(foundUser){
         const token = jwt.sign({username: foundUser.username, name: foundUser.email}, SECRET_KEY,{
-            expiresIn: 60,
+            expiresIn: "1h",
         });
 
         const Authorization ={

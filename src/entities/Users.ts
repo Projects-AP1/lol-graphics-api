@@ -18,4 +18,10 @@ export class Users{
     @Column()
     puuid: string;
 
+    @Column()
+    autenticationtoken: string;
+
+    @Column()
+    authenticated: string;
+
 }
