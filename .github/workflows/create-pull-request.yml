@@ -1,24 +1,24 @@
-name: Create Pull Request
+name: Create Pull Request from Jira
 
 on:
-  workflow_dispatch:
-  repository_dispatch:
-    types: [create-pull-request]
+  workflow_dispatch: 
+  issues:
+    types: [edited]
 
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-      - name: Create Pull Request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BASE_BRANCH="develop"
-          HEAD_BRANCH="${{ github.event.client_payload.branch_name }}"
-          PR_TITLE="Automated Pull Request from Jira issue ${{ github.event.client_payload.issue_key }}"
-          PR_BODY="This pull request was automatically created for Jira issue ${{ github.event.client_payload.issue_key }}."
-
-          gh pr create --base $BASE_BRANCH --head $HEAD_BRANCH --title "$PR_TITLE" --body "$PR_BODY"
+    - name: Create Pull Request
+      id: create_pr
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'Auto-generated PR from Jira issue'
+        branch: 'feature-branch'
+        title: 'Auto-generated Pull Request'
+        body: 'This pull request was automatically created by Jira issue transition.'
