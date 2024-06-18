@@ -1,30 +1,26 @@
-name: Create Pull Request Workflow
-
+name: Create Pull Request
 on:
   push:
     branches:
-      - main  # or the branch you want to trigger the workflow
+      - main
 
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Make Changes
-        run: |
-          # Your script or commands to make changes
-          echo "Example change" >> example-file.txt
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6.0.5
+        uses: peter-evans/create-pull-request@v3
         with:
-          token: "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"
-          commit-message: "Automated change by GitHub Action"
-          branch: "automated-changes-branch"
-          title: "Automated changes"
-          body: "This PR contains automated changes"
-          labels: "automation,bot"
-          assignees: "AkyrisPinange"
-          reviewers: "AkyrisPinange,AkyrisPinange"
+          commit-message: Update data
+          committer: GitHub Actions <actions@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          title: 'Data Update'
+          body: 'This is an automated pull request to update the data'
+          labels: update,data
+          assignees: user1,user2
+          reviewers: reviewer1,reviewer2
+          team-reviewers: team1,team2
+          branch: example-branch-name
