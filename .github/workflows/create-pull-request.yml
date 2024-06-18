@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
           commit-message: Update data
           committer: GitHub Actions <actions@github.com>
@@ -20,7 +20,7 @@ jobs:
           title: 'Data Update'
           body: 'This is an automated pull request to update the data'
           labels: update,data
-          assignees: user1,user2
-          reviewers: reviewer1,reviewer2
+          assignees: AkyrisPinange
+          reviewers: AkyrisPinange
           team-reviewers: team1,team2
-          branch: example-branch-name
+          branch: feature/KAN-10
