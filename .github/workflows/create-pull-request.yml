@@ -17,7 +17,7 @@ jobs:
       id: create_pr
       uses: peter-evans/create-pull-request@v3
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.TOKEN }}
         commit-message: 'Auto-generated PR from Jira issue'
         branch: 'feature-branch'
         title: 'Auto-generated Pull Request'
