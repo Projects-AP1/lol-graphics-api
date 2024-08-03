@@ -1,24 +1,39 @@
-name: Create Pull Request from Jira
+name: Create Pull Request
 
 on:
-  workflow_dispatch: # This allows manual trigger of the workflow
-  issues:
-    types: [edited]
+  workflow_dispatch:
+    inputs:
+      jira_issue_key:
+        description: 'Jira issue key'
+        required: true
+        type: string
+      github_user:
+        description: 'GitHub username of the Jira user'
+        required: true
+        type: string
 
 jobs:
-  create-pull-request:
+  create-pr:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Create Pull Request
-      id: create_pr
-      uses: peter-evans/create-pull-request@v4
-      with:
-        token: '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'
-        commit-message: 'Auto-generated PR from Jira issue'
-        branch: 'feature-branch'
-        title: 'Auto-generated Pull Request'
-        body: 'This pull request was automatically created by Jira issue transition.'
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          issue_key=${{ github.event.inputs.jira_issue_key }}
+          github_user=${{ github.event.inputs.github_user }}
+          
+          branch_name="feature-${issue_key}"
+          
+          git checkout -b $branch_name
+          git push origin $branch_name
+          
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{"title": "PR for '${issue_key}' created by '${github_user}'","head": "'$branch_name'","base": "main"}' \
+            https://api.github.com/repos/your-username/your-repo/pulls
